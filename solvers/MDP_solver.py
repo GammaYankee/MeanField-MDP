@@ -1,5 +1,5 @@
 import numpy as np
-from env.base_env import MeanFieldEnv
+from envs.base_env import MeanFieldEnv
 
 
 class MDP_Solver:
@@ -14,7 +14,7 @@ class MDP_Solver:
 
     def solve(self, nu):
         diff = 1
-        for _ in range(self.n_ittr):
+        for _ in range(self.n_ittr):  # TODO:Check if need to iterate. Finite Horizon probably not.
             if diff < self.eps:
                 break
 
@@ -53,6 +53,7 @@ class MDP_Solver:
 
     def _resetTemp(self):
         self.V_ = [np.zeros(self.env.n_states) for _ in range(self.Tf + 1)]
+        self.policy = [[np.zeros(self.env.n_actions[s]) for s in range(self.env.n_states)] for _ in range(self.Tf + 1)]
 
     def _updateNew(self):
         self.V = np.copy(self.V_)

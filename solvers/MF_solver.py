@@ -1,6 +1,6 @@
 import numpy as np
 from solvers.MDP_solver import MDP_Solver
-from env.base_env import MeanFieldEnv
+from envs.base_env import MeanFieldEnv
 import copy
 
 
@@ -23,7 +23,7 @@ class MFSolver:
         nu = [np.zeros(self.env.dim_nu) for _ in range(self.env.Tf + 1)]
         mu = [np.zeros(self.env.n_states) for _ in range(self.env.Tf + 1)]
 
-        for _ in range(self.n_ittr):
+        for ittr in range(self.n_ittr):
             if diff1 < self.eps or diff2 < self.eps:
                 break
             nu_, mu_ = self.propogate_mean_field(policy)  # propagate mean field
@@ -73,21 +73,21 @@ class MFSolver:
         return nu_t
 
     def controlled_trans(self, pi_t):
-        T_c = np.zeros(self.env.n_states, self.env.n_states)
+        T_c = np.zeros((self.env.n_states, self.env.n_states))
         for s in range(self.env.n_states):
             for a in range(self.env.n_actions[s]):
                 T_c[s, :] += self.env.T[a][s] * pi_t[s][a]
 
-        assert all(np.sum(T_c, axis=0) == 1)
+        assert all(np.sum(T_c, axis=1) == 1)
 
         return T_c
 
     def _init_policy(self):
         policy = []
-        for t in range(self.env.Tf):
+        for t in range(self.env.Tf + 1):
             policy_t = []
             for s in range(self.env.n_states):
-                tmp = np.random.random(self.env.n_states[s])
+                tmp = np.random.random(self.env.n_actions[s])
                 tmp = tmp / sum(tmp)
                 policy_t.append(tmp)
             policy.append(policy_t)

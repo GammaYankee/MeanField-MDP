@@ -1,4 +1,4 @@
-from env.base_env import MeanFieldEnv
+from envs.base_env import MeanFieldEnv
 import numpy as np
 
 # Graph Information
@@ -11,7 +11,7 @@ T1 = [np.array([0, 1, 0, 0, 0]), np.array([1, 0, 0, 0, 0]), np.array([0, 1, 0, 0
 T2 = [[], np.array([0, 0, 1, 0, 0]), np.array([0, 0, 0, 1, 0]), [], [], []]
 
 # Terminal Time
-Tf = 1
+Tf = 5
 
 
 class RotateConfEnv(MeanFieldEnv):
