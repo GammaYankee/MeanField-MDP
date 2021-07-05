@@ -1,36 +1,37 @@
 from envs.mean_field_env import MeanFieldEnv
 import numpy as np
+import math
 
 # Graph Information
-N_STATES = 5
-N_ACTIONS = [1, 2, 2, 1, 1]
+N_STATES = 4
+N_ACTIONS = [2, 2, 2, 2]
 
 # Transitions
-T1 = [np.array([0, 1, 0, 0, 0]), np.array([1, 0, 0, 0, 0]), np.array([0, 1, 0, 0, 0]), np.array([0, 0, 0, 0, 1]),
-      np.array([0, 0, 1, 0, 0])]
-T2 = [[], np.array([0, 0, 1, 0, 0]), np.array([0, 0, 0, 1, 0]), [], [], []]
+np.random.seed(0)
+T1 = [np.random.random(N_STATES) for _ in range(N_STATES)]
+T1 = [T1[k] / sum(T1[k]) for k in range(N_STATES)]
+
+T2 = [np.random.random(N_STATES) for _ in range(N_STATES)]
+T2 = [T2[k] / sum(T2[k]) for k in range(N_STATES)]
 
 # Terminal Time
 Tf = 5
 
 
-class RotateConfEnv(MeanFieldEnv):
+class TestEnv(MeanFieldEnv):
     def __init__(self, mu0):
-        super(RotateConfEnv, self).__init__(N_STATES, N_ACTIONS, Tf, gamma=1)
+        super(TestEnv, self).__init__(N_STATES, N_ACTIONS, Tf, gamma=1)
         self.set_init_mu(mu0)
 
     def _init_transitions(self):
         return [T1, T2]
 
+    def pairwise_reward(self, s, a, s_prime, t):
+        return s ** 2 - s_prime ** 2
+
     def theta(self, x, t):
         if t == self.Tf:
-            return x
-        else:
-            return 0
-
-    def pairwise_reward(self, s, a, s_prime, t):
-        if s == s_prime:
-            return 1
+            return x ** 1
         else:
             return 0
 
@@ -63,8 +64,9 @@ class RotateConfEnv(MeanFieldEnv):
     #         return 0  # no running reward
     #     elif t == Tf:
     #         mu_t = self.nu2mu(nu_t)
-    #         return mu_t[s_t]
-    #
+    #         r = 0
+    #         for s_prime in range(self.n_states):
+    #             r += self.pairwise_reward(s_t, a_t, s_prime, t) * mu_t[s_prime]
+    #         return r
     #     else:
     #         raise Exception('time step error!')
-

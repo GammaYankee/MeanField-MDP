@@ -1,4 +1,4 @@
-from envs.base_env import MeanFieldEnv
+from envs.mean_field_env import MeanFieldEnv
 import numpy as np
 
 # Graph information

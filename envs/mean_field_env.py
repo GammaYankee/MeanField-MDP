@@ -24,6 +24,17 @@ class MeanFieldEnv():
         raise NotImplemented
 
     def individual_reward(self, s_t, a_t, nu_t, t):
+        r = 0
+        mu_t = self.nu2mu(nu_t)
+        for s_prime in range(self.n_states):
+            r += self.pairwise_reward(s_t, a_t, s_prime, t) * mu_t[s_prime]
+
+        return self.theta(r, t)
+
+    def theta(self, x, t):
+        raise NotImplemented
+
+    def pairwise_reward(self, s, a, s_prime, t):
         raise NotImplemented
 
     def state_action2index(self, s, a):
