@@ -33,7 +33,7 @@ induced_mdp = mf_solver.soln["MDP_induced"]
 
 mean_field_value = np.matmul(mean_field_value_flow[0], mu0.T)
 
-finite_population_MDP = FinitePopMDPEnv(n_agents=10, mean_field_env=mean_filed_env,
+finite_population_MDP = FinitePopMDPEnv(n_agents=1, mean_field_env=mean_filed_env,
                                         mean_field_policy=mean_field_policy_flow)
 
 error_verification_mdp_solver = MDP_Solver(env=finite_population_MDP)

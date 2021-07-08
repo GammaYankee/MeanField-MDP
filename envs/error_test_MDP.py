@@ -38,7 +38,7 @@ class FinitePopMDPEnv(MDPEnv):
             n_list = case.n_list
             p = case.prob
             l = self._pair_wise_emp_dist(s, a, t, n_list)
-            r +=  self.mean_field_env.theta(p *l, t)
+            r += p * self.mean_field_env.theta(l, t)
         return r
 
     def _pair_wise_emp_dist(self, s, a, t, n_list):
