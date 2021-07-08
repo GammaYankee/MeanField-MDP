@@ -1,5 +1,6 @@
 import numpy as np
 from envs.MDP_env import MDPEnv
+from copy import deepcopy
 
 
 class MDP_Solver:
@@ -35,7 +36,7 @@ class MDP_Solver:
             diff = sum(sum(abs(self.V[t] - self.V_[t])) for t in range(self.Tf + 1))
             self._updateNew()
 
-        return self.policy
+        return self.policy, self.V
 
     def computeQs(self, s, t):
         n_actions = self.env.n_actions[s]
@@ -54,4 +55,4 @@ class MDP_Solver:
         self.policy = [[np.zeros(self.env.n_actions[s]) for s in range(self.env.n_states)] for _ in range(self.Tf + 1)]
 
     def _updateNew(self):
-        self.V = np.copy(self.V_)
+        self.V = deepcopy(self.V_)

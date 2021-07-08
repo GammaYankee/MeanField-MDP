@@ -1,5 +1,7 @@
 import math
 from copy import deepcopy
+import numpy as np
+
 
 def empirical_dist(N, p):
     '''
@@ -47,11 +49,22 @@ def empirical_dist(N, p):
     return expand(queue, N)
 
 
+def test_emp_dist(emp_dist, N, p):
+    n_list = np.array([0, 0, 0, 0]).astype(float)
+    for case in emp_dist:
+        n_list += np.array(case.n_list) * case.prob
+    print((n_list / N, p))
+
+
 if __name__ == "__main__":
-    dist = empirical_dist(1000, [0.3, 0.2, 0.1, 0.4])
+    N = 100
+    p = [0.3, 0.2, 0.1, 0.4]
+    dist = empirical_dist(N, p)
 
     prob = [dist[k].prob for k in range(len(dist))]
 
     print(sum(prob))
 
     print("done!")
+
+    test_emp_dist(dist, N, p)

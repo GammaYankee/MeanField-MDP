@@ -18,6 +18,7 @@ class MFSolver:
 
         # randomly initialize policy
         policy = self._init_policy()
+        value = None
 
         # intialize mean field
         nu = [np.zeros(self.mean_field_env.dim_nu) for _ in range(self.mean_field_env.Tf + 1)]
@@ -32,14 +33,14 @@ class MFSolver:
 
             mdp_solver = MDP_Solver(env=mdp_env)
 
-            policy = mdp_solver.solve()
+            policy, value = mdp_solver.solve()
 
             diff1 = sum(sum(abs(nu_[t] - nu[t])) for t in range(self.mean_field_env.Tf + 1))
             diff2 = sum(sum(abs(mu_[t] - mu[t])) for t in range(self.mean_field_env.Tf + 1))
             nu = copy.deepcopy(nu_)
             mu = copy.deepcopy(mu_)
 
-        self.soln = {"policy": policy, "mu": mu, "nu": nu}
+        self.soln = {"policy": policy, "value": value, "mu": mu, "nu": nu, "MDP_induced": mdp_env}
 
     def propogate_mean_field(self, policy):
         mu = [np.zeros(self.mean_field_env.n_states) for _ in range(self.mean_field_env.Tf + 1)]

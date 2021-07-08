@@ -27,11 +27,11 @@ class TestEnv(MeanFieldEnv):
         return [T1, T2]
 
     def pairwise_reward(self, s, a, s_prime, t):
-        return s ** 2 - s_prime ** 2
+        return s ** 2 + s_prime ** 2
 
     def theta(self, x, t):
         if t == self.Tf:
-            return x ** 1
+            return x
         else:
             return 0
 
