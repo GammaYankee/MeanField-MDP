@@ -23,11 +23,12 @@ class MFSolver:
         # intialize mean field
         nu = [np.zeros(self.mean_field_env.dim_nu) for _ in range(self.mean_field_env.Tf + 1)]
         mu = [np.zeros(self.mean_field_env.n_states) for _ in range(self.mean_field_env.Tf + 1)]
+        mdp_env = None
 
         for ittr in range(self.n_ittr):
             if diff1 < self.eps or diff2 < self.eps:
                 break
-            nu_, mu_ = self.propogate_mean_field(policy)  # propagate mean field
+            nu_, mu_ = self.propagate_mean_field(policy)  # propagate mean field
 
             mdp_env = self._generate_MDP_env(nu_)
 
@@ -42,7 +43,7 @@ class MFSolver:
 
         self.soln = {"policy": policy, "value": value, "mu": mu, "nu": nu, "MDP_induced": mdp_env}
 
-    def propogate_mean_field(self, policy):
+    def propagate_mean_field(self, policy):
         mu = [np.zeros(self.mean_field_env.n_states) for _ in range(self.mean_field_env.Tf + 1)]
         mu[0] = self.mean_field_env.mu0
 

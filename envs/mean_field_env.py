@@ -16,6 +16,7 @@ class MeanFieldEnv():
         self.mu0 = None
         self.gamma = gamma
         self.dim_nu = sum(self.n_actions)           # dimension of the state-action mean field
+        self.terminal_reward_only = None
 
     def set_init_mu(self, mu0):
         self.mu0 = mu0

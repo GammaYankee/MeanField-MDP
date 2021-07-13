@@ -7,6 +7,7 @@ from utils import empirical_dist, test_emp_dist
 class FinitePopMDPEnv(MDPEnv):
     def __init__(self, n_agents, mean_field_env: MeanFieldEnv, mean_field_policy):
         self.mean_field_env = mean_field_env
+        self.mu = None
         super(FinitePopMDPEnv, self).__init__(self.mean_field_env.n_states, self.mean_field_env.n_actions,
                                               self.mean_field_env.Tf, self.mean_field_env.gamma)
         self.mu_0 = self.mean_field_env.mu0
@@ -15,7 +16,6 @@ class FinitePopMDPEnv(MDPEnv):
         self._init_transitions()
         self.emp_dist_flow = self.compute_emp_dist_flow()
         self._init_reward_vec()
-
 
     def _init_transitions(self):
         self.T = self.mean_field_env.T
@@ -33,7 +33,8 @@ class FinitePopMDPEnv(MDPEnv):
     def _deviated_reward(self, s, a, t):
         r = 0
         emp_dist = self.emp_dist_flow[t]
-
+        if emp_dist is None:
+            return 0
         for case in emp_dist:
             n_list = case.n_list
             p = case.prob
@@ -47,7 +48,7 @@ class FinitePopMDPEnv(MDPEnv):
             if s != state:
                 state_count = n_list[state]
             else:
-                state_count = n_list[state]
+                state_count = n_list[state] + 1
 
             state_fraction = state_count / self.n_agents
 
@@ -59,17 +60,22 @@ class FinitePopMDPEnv(MDPEnv):
         emp_dist_flow = []
         mean_field_flow = self.compute_mean_field_flow()
         for t in range(len(mean_field_flow)):
-            mu_t = mean_field_flow[t]
-            emp_dist_flow.append(empirical_dist(N=self.n_agents, p=mu_t))
-
+            if self.mean_field_env.terminal_reward_only and t < self.mean_field_env.Tf:
+                # If only terminal reward is assigned, no need to worry about non-terminal emp dist
+                emp_dist_flow.append(None)
+            else:
+                mu_t = mean_field_flow[t]
+                emp_dist_flow.append(empirical_dist(N=self.n_agents - 1, p=mu_t))
+        print("Total {} nodes expanded for empirical distribution".format(len(emp_dist_flow[-1])))
         return emp_dist_flow
 
     def compute_mean_field_flow(self):
         mu = [self.mu_0]
-        for t in range(self.Tf + 1):
-            pi_t = self.mean_field_policy[t - 1]
+        for t in range(self.Tf):
+            pi_t = self.mean_field_policy[t]
             controlled_trans = self.mean_field_controlled_trans(pi_t)
-            mu.append(np.matmul(mu[-1], controlled_trans))
+            mu.append(np.matmul(mu[t], controlled_trans))
+        self.mu = mu
         return mu
 
     def mean_field_controlled_trans(self, pi_t):

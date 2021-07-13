@@ -22,6 +22,7 @@ class TestEnv(MeanFieldEnv):
     def __init__(self, mu0):
         super(TestEnv, self).__init__(N_STATES, N_ACTIONS, Tf, gamma=1)
         self.set_init_mu(mu0)
+        self.terminal_reward_only = True
 
     def _init_transitions(self):
         return [T1, T2]
@@ -31,7 +32,7 @@ class TestEnv(MeanFieldEnv):
 
     def theta(self, x, t):
         if t == self.Tf:
-            return x
+            return x ** 2
         else:
             return 0
 

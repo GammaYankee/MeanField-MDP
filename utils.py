@@ -1,6 +1,7 @@
 import math
 from copy import deepcopy
 import numpy as np
+import matplotlib.pyplot as plt
 
 
 def empirical_dist(N, p):
@@ -40,7 +41,7 @@ def empirical_dist(N, p):
                     prob = node.prob * math.comb(N_left, n_k) * p[state] ** n_k
                     node_ = Node(n_list, prob)
                     queue.append(node_)
-        print(len(queue))
+        # print(len(queue))
         queue = expand(queue, N)
         return queue
 
@@ -57,14 +58,38 @@ def test_emp_dist(emp_dist, N, p):
 
 
 if __name__ == "__main__":
-    N = 100
+    N = [1, 5, 10, 20, 50]
     p = [0.3, 0.2, 0.1, 0.4]
-    dist = empirical_dist(N, p)
+    errors = []
+    for n in N:
+        error = 0
+        dist = empirical_dist(n, p)
+        probs = [dist[k].prob for k in range(len(dist))]
+        cases = [dist[k].n_list for k in range(len(dist))]
 
-    prob = [dist[k].prob for k in range(len(dist))]
+        for prob, case in zip(probs, cases):
+            emp_dist = [case[k]/n for k in range(len(case))]
+            error += prob * sum([abs(emp_dist[k] - p[k]) for k in range(len(p))])
 
-    print(sum(prob))
+        errors.append(error)
+        print("done with N={}".format(n))
 
-    print("done!")
+    w = 8
+    h = 6
+    d = 80
+    plt.figure(figsize=(w, h), dpi=d)
+    plt.loglog(N, errors, '-ko')
+    plt.title("Performance Error with Finite Population", fontsize=18)
+    plt.xlabel("Number of agents", fontsize=15)
+    plt.ylabel("Performance Gain by Deviating", fontsize=15)
+    plt.show()
 
-    test_emp_dist(dist, N, p)
+    slope = (math.log(errors[1]) - math.log(errors[2])) / (
+                math.log(N[1]) - math.log(N[2]))
+
+    print(slope)
+
+
+
+
+
