@@ -2,6 +2,7 @@ import math
 from copy import deepcopy
 import numpy as np
 import matplotlib.pyplot as plt
+from envs.mean_field_env import MeanFieldEnv
 
 
 def empirical_dist(N, p):
@@ -57,7 +58,10 @@ def test_emp_dist(emp_dist, N, p):
     print((n_list / N, p))
 
 
+
+
 if __name__ == "__main__":
+    from plot_error import plot_log_log_error
     N = [1, 5, 10, 20, 50]
     p = [0.3, 0.2, 0.1, 0.4]
     errors = []
@@ -74,20 +78,10 @@ if __name__ == "__main__":
         errors.append(error)
         print("done with N={}".format(n))
 
-    w = 8
-    h = 6
-    d = 80
-    plt.figure(figsize=(w, h), dpi=d)
-    plt.loglog(N, errors, '-ko')
-    plt.title("Performance Error with Finite Population", fontsize=18)
-    plt.xlabel("Number of agents", fontsize=15)
-    plt.ylabel("Performance Gain by Deviating", fontsize=15)
-    plt.show()
+    plot_log_log_error(N, errors)
 
-    slope = (math.log(errors[1]) - math.log(errors[2])) / (
-                math.log(N[1]) - math.log(N[2]))
 
-    print(slope)
+
 
 
 

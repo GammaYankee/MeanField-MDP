@@ -38,6 +38,18 @@ class MDP_Solver:
 
         return self.policy, self.V
 
+    def evaluate(self, policy):
+        for t in reversed(range(self.env.Tf + 1)):
+            for s in range(self.env.n_states):
+                if t == self.env.Tf:
+                    Q_s = np.zeros(self.env.n_actions[s])
+                    for a in range(self.env.n_actions[s]):
+                        Q_s[a] = self.env.reward(s=s, a=a, t=t)
+                else:
+                    Q_s = self.computeQs(s, t)
+                self.V_[t][s] = sum(Q_s[a] * policy[t][s][a] for a in range(self.env.n_actions[s]))
+        return self.V_
+
     def computeQs(self, s, t):
         n_actions = self.env.n_actions[s]
         Q_s = np.zeros(n_actions)

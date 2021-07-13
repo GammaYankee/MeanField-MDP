@@ -8,6 +8,7 @@ from visualizers.visualize_mf import visualize_mf
 from envs.error_test_MDP import FinitePopMDPEnv
 import matplotlib.pyplot as plt
 import pickle
+from plot_error import plot_log_log_error
 
 mu0 = np.array([0.3, 0.4, 0.2, 0.1])
 mean_filed_env = TestEnv(mu0=mu0)
@@ -35,21 +36,33 @@ induced_mdp = mf_solver.soln["MDP_induced"]
 
 mean_field_value = np.matmul(mean_field_value_flow[0], mu0.T)
 
-N_agent_test_list = [1, 5, 10, 20, 50, 75, 100, 150, 200]
-error = []
-
+N_agent_test_list = [1, 5, 10, 50]  # [1, 5, 10, 20, 50, 75, 100, 150, 200]
+performance_improve = []
+errors = []
+reward_errors = []
 for N in N_agent_test_list:
     print("Testing finite population with N={}".format(N))
+
+    # Evaluate performance of mean field policy with N agents
     finite_population_MDP = FinitePopMDPEnv(n_agents=N, mean_field_env=mean_filed_env,
                                             mean_field_policy=mean_field_policy_flow)
+    performance_evaluator = MDP_Solver(env=finite_population_MDP)
+    induced_value_flow = performance_evaluator.evaluate(mean_field_policy_flow)
+    original_performance = np.matmul(induced_value_flow[0], mu0.T)
 
+    # Let agent i optimize with N-1 agents fixed to mean field policy
     error_verification_mdp_solver = MDP_Solver(env=finite_population_MDP)
-    _, value_flow = error_verification_mdp_solver.solve()
+    reward_error = abs(induced_mdp.reward_vec[-1][0][0] - finite_population_MDP.reward_vec[-1][0][0])
+    deviated_policy, value_flow = error_verification_mdp_solver.solve()
+
     deviated_value = np.matmul(value_flow[0], mu0.T)
-    error.append(deviated_value - mean_field_value)
+
+    performance_improve.append(deviated_value - original_performance)
+    errors.append(abs(original_performance - mean_field_value))
+    reward_errors.append(reward_error)
+
+plot_log_log_error(N_agent_test_list, performance_improve)
 
 # save test data
-data = {"N_agent_test_list": N_agent_test_list, "error": error}
+data = {"N_agent_test_list": N_agent_test_list, "error": errors, "reward_error": reward_errors}
 pickle.dump(data, open("./test_data/data.pkl", "wb"))
-
-
