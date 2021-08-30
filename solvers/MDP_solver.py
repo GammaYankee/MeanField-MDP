@@ -1,6 +1,7 @@
 import numpy as np
 from envs.MDP_env import MDPEnv
 from copy import deepcopy
+from math import exp, log
 
 
 class MDP_Solver:
@@ -14,27 +15,44 @@ class MDP_Solver:
         self.policy = [[np.zeros(self.env.n_actions[s]) for s in range(self.env.n_states)] for _ in range(self.Tf + 1)]
 
     def solve(self):
-        diff = 1
-        for _ in range(self.n_ittr):  # TODO:Check if need to iterate. Finite Horizon probably not.
-            if diff < self.eps:
-                break
+        self._resetTemp()
+        for t in reversed(range(self.env.Tf + 1)):
+            for s in range(self.env.n_states):
+                if t == self.env.Tf:  # terminal time step
+                    Q_s = np.zeros(self.env.n_actions[s])
+                    for a in range(self.env.n_actions[s]):
+                        Q_s[a] = self.env.reward(s=s, a=a, t=t)
+                else:
+                    Q_s = self.compute_Q_s(s, t)
 
-            self._resetTemp()
-            for t in reversed(range(self.env.Tf + 1)):
-                for s in range(self.env.n_states):
-                    if t == self.env.Tf:  # terminal time step
-                        Q_s = np.zeros(self.env.n_actions[s])
-                        for a in range(self.env.n_actions[s]):
-                            Q_s[a] = self.env.reward(s=s, a=a, t=t)
-                    else:
-                        Q_s = self.computeQs(s, t)
+                self.V_[t][s] = max(Q_s)
+                a_max = np.argmax(Q_s)
+                self.policy[t][s][a_max] = 1
+        self._updateNew()
 
-                    self.V_[t][s] = max(Q_s)
-                    a_max = np.argmax(Q_s)
-                    self.policy[t][s][a_max] = 1
+        return self.policy, self.V
 
-            diff = sum(sum(abs(self.V[t] - self.V_[t])) for t in range(self.Tf + 1))
-            self._updateNew()
+    def solve_entropy(self, prior=None, beta=1):
+        self._resetTemp()
+        for t in reversed(range(self.env.Tf + 1)):
+            for s in range(self.env.n_states):
+                if prior is not None:
+                   prior_s = prior[t][s]
+                else:
+                    prior_s = [1/self.env.n_actions[s] for _ in range(self.env.n_actions[s])]
+                if t == self.env.Tf:  # terminal time step
+                    Q_s = np.zeros(self.env.n_actions[s])
+                    for a in range(self.env.n_actions[s]):
+                        Q_s[a] = self.env.reward(s=s, a=a, t=t)
+                else:
+                    Q_s = self.compute_Q_s(s, t)
+
+                # compute entropy regularized value function
+                self.V_[t][s] = self._compute_V_KL(Q_s, prior_s, beta)
+
+                # compute soft-optimal policies
+                self.policy[t][s] = self._compute_soft_policy(Q_s, prior_s, beta)
+        self._updateNew()
 
         return self.policy, self.V
 
@@ -46,11 +64,11 @@ class MDP_Solver:
                     for a in range(self.env.n_actions[s]):
                         Q_s[a] = self.env.reward(s=s, a=a, t=t)
                 else:
-                    Q_s = self.computeQs(s, t)
+                    Q_s = self.compute_Q_s(s, t)
                 self.V_[t][s] = sum(Q_s[a] * policy[t][s][a] for a in range(self.env.n_actions[s]))
         return self.V_
 
-    def computeQs(self, s, t):
+    def compute_Q_s(self, s, t):
         n_actions = self.env.n_actions[s]
         Q_s = np.zeros(n_actions)
         V_next = self.V_[t + 1]
@@ -61,6 +79,24 @@ class MDP_Solver:
             for s_prime in range(self.env.n_states):
                 Q_s[a] += self.env.gamma * T_sa[s_prime] * V_next[s_prime]
         return Q_s
+
+    def _compute_V_KL(self, Q_s, prior_s, beta):
+        temp = 0
+        for a in range(len(Q_s)):
+            temp += prior_s[a] * exp(beta * Q_s[a])
+        V_KL = 1 / beta * log(temp)
+        return V_KL
+
+    def _compute_soft_policy(self, Q_s, prior_s, beta):
+        policy_KL = []
+        for a in range(len(Q_s)):
+            prob_a = prior_s[a] * exp(beta * Q_s[a])
+            policy_KL.append(prob_a)
+        Z = sum(policy_KL)
+        for a in range(len(Q_s)):
+            policy_KL[a] /= Z
+        assert (abs(sum(policy_KL) - 1) < 1e-5)
+        return policy_KL
 
     def _resetTemp(self):
         self.V_ = [np.zeros(self.env.n_states) for _ in range(self.Tf + 1)]

@@ -13,7 +13,7 @@ class MFSolver:
         self.soln = None
         np.random.seed(0)
 
-    def solve(self):
+    def solve(self, entropy_regularized=False, beta=1):
         diff1, diff2 = 1, 1
 
         # randomly initialize policy
@@ -34,12 +34,17 @@ class MFSolver:
 
             mdp_solver = MDP_Solver(env=mdp_env)
 
-            policy, value = mdp_solver.solve()
+            if entropy_regularized:
+                policy, value = mdp_solver.solve_entropy(prior=None, beta=beta)
+            else:
+                policy, value = mdp_solver.solve()
 
             diff1 = sum(sum(abs(nu_[t] - nu[t])) for t in range(self.mean_field_env.Tf + 1))
             diff2 = sum(sum(abs(mu_[t] - mu[t])) for t in range(self.mean_field_env.Tf + 1))
             nu = copy.deepcopy(nu_)
             mu = copy.deepcopy(mu_)
+
+            print("Differene 1 is {}, difference 2 is {}.".format(diff1, diff2))
 
         self.soln = {"policy": policy, "value": value, "mu": mu, "nu": nu, "MDP_induced": mdp_env}
 
@@ -99,7 +104,6 @@ class MFSolver:
             policy.append(policy_t)
         return policy
 
-
     def _generate_MDP_env(self, nu):
         n_actions = max(self.mean_field_env.n_actions)
 
@@ -112,11 +116,10 @@ class MFSolver:
                     reward_s.append(self.mean_field_env.individual_reward(s_t=s, a_t=a, nu_t=nu[t], t=t))
                 reward_vec[t].append(reward_s)
 
-        mdp_env = MDPEnv(n_states=self.mean_field_env.n_states, n_actions=self.mean_field_env.n_actions, Tf=self.mean_field_env.Tf, gamma=self.mean_field_env.gamma)
+        mdp_env = MDPEnv(n_states=self.mean_field_env.n_states, n_actions=self.mean_field_env.n_actions,
+                         Tf=self.mean_field_env.Tf, gamma=self.mean_field_env.gamma)
 
         mdp_env.set_reward_vec(reward_vec)
         mdp_env.set_transitions(self.mean_field_env.T)
 
         return mdp_env
-
-
