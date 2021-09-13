@@ -15,9 +15,9 @@ T3 = np.array([[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]])  # Stay
 Tf = 10
 
 
-class BlottoEnv(MeanFieldEnv):
+class BlottoEnv1(MeanFieldEnv):
     def __init__(self, mu_0):
-        super(BlottoEnv, self).__init__(N_STATES, N_ACTIONS, Tf)
+        super(BlottoEnv1, self).__init__(N_STATES, N_ACTIONS, Tf)
         self.set_init_mu(mu_0)
 
     def _init_transitions(self):

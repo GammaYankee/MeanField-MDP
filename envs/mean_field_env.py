@@ -49,7 +49,6 @@ class MeanFieldEnv():
         return s, a
 
     def nu_vec2nu_matrix(self, nu_vec: np.ndarray):
-        assert nu_vec.shape[1] == 1
         nu = nu_vec.reshape((self.n_states, self.n_actions))
         return nu
 

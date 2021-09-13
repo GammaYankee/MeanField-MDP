@@ -6,14 +6,14 @@ import copy
 
 
 class MFSolver:
-    def __init__(self, env: MeanFieldEnv, n_ittr=10, eps=0.0001):
+    def __init__(self, env: MeanFieldEnv, n_ittr=30, eps=0.0001):
         self.mean_field_env = env
         self.n_ittr = n_ittr
         self.eps = eps
         self.soln = None
         np.random.seed(0)
 
-    def solve(self, entropy_regularized=False, beta=1):
+    def solve(self, entropy_regularized=False, prior=None, beta=None):
         diff1, diff2 = 1, 1
 
         # randomly initialize policy
@@ -35,7 +35,7 @@ class MFSolver:
             mdp_solver = MDP_Solver(env=mdp_env)
 
             if entropy_regularized:
-                policy, value = mdp_solver.solve_entropy(prior=None, beta=beta)
+                policy, value = mdp_solver.solve_entropy(prior=prior, beta=beta)
             else:
                 policy, value = mdp_solver.solve()
 
@@ -43,6 +43,7 @@ class MFSolver:
             diff2 = sum(sum(abs(mu_[t] - mu[t])) for t in range(self.mean_field_env.Tf + 1))
             nu = copy.deepcopy(nu_)
             mu = copy.deepcopy(mu_)
+            print(diff1)
 
             print("Differene 1 is {}, difference 2 is {}.".format(diff1, diff2))
 

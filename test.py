@@ -1,6 +1,7 @@
 import numpy as np
 from envs.rotate_env import RotateConfEnv
 from envs.error_test_env import TestEnv
+from envs.blotto_env_v2 import BlottoEnv2
 from solvers.MDP_solver import MDP_Solver
 from solvers.MF_solver import MFSolver
 from solvers.MDP_solver import MDP_Solver
@@ -13,18 +14,24 @@ from plot_error import plot_log_log_error
 # mu0 = np.array([0.3, 0.4, 0.2, 0.1])
 # mean_filed_env = TestEnv(mu0=mu0)
 
-mu0 = np.array([0.1, 0.4, 0.2, 0.1, 0.2])
-# mu0 = np.array([0.5, 0.5, 0, 0, 0])
-mean_filed_env = RotateConfEnv(mu0=mu0)
+# mu0 = np.array([0.1, 0.4, 0.2, 0.1, 0.2])
+# mean_field_env = RotateConfEnv(mu0=mu0)
 
 # MDP Solver test
 # nu = [np.array([0.1, 0.3, 0, 0.2, 0, 0.1, 0.3]), np.array([0.3, 0.1, 0.1, 0.15, 0.25, 0, 0.1])]
 # mdp_solver = MDP_Solver(envs=envs)
 # mdp_solver.solve(nu=nu)
 
+# Blotto Game Env V2
+mu0 = np.array([1, 0, 0, 0, 0])
+mean_field_env = BlottoEnv2(mu_0=mu0)
+
+
 # MF Solver test
-mf_solver = MFSolver(env=mean_filed_env)
-mf_solver.solve(entropy_regularized=True, beta=10)
+mf_solver = MFSolver(env=mean_field_env)
+mf_solver.solve()
+mf_solver = MFSolver(env=mean_field_env)
+mf_solver.solve(entropy_regularized=True, beta=3)
 print(mf_solver.soln["mu"][-1])
 
 visualize_mf(mf_solver.soln["mu"])
