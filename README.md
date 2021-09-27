@@ -27,7 +27,7 @@ sa MF flow      |`nu`               |List of np array|Length `Tf+1`. Consists of
 
 ## Exemplary Outputs
 The following figure presents the evolution of the population in the resource allocation example.
-![Blotto Game Mean Field Flow](/figures/blotto-game-flow.png | width=100)
+![Blotto Game Mean Field Flow](/figures/blotto-game-flow.png | width="100")
 
 The following figure is a sample output of the error verification algorithm
-![Blotto Game Mean Field Flow](/figures/error-verification.png | width=100)
+![Blotto Game Mean Field Flow](/figures/error-verification.png | width="100")
