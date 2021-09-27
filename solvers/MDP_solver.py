@@ -14,6 +14,10 @@ class MDP_Solver:
         self.V_ = [np.zeros(self.env.n_states) for _ in range(self.Tf + 1)]  # Temp storage
         self.policy = [[np.zeros(self.env.n_actions[s]) for s in range(self.env.n_states)] for _ in range(self.Tf + 1)]
 
+    def reset_V_storage(self):
+        self.V = [np.zeros(self.env.n_states) for _ in range(self.Tf + 1)]  # Value Function
+        self.V_ = [np.zeros(self.env.n_states) for _ in range(self.Tf + 1)]  # Temp storage
+
     def solve(self):
         self._resetTemp()
         for t in reversed(range(self.env.Tf + 1)):
@@ -32,14 +36,14 @@ class MDP_Solver:
 
         return self.policy, self.V
 
-    def solve_entropy(self, prior=None, beta=1):
+    def solve_entropy(self, prior=None, beta=None):
         self._resetTemp()
         for t in reversed(range(self.env.Tf + 1)):
             for s in range(self.env.n_states):
                 if prior is not None:
-                   prior_s = prior[t][s]
+                    prior_s = prior[t][s]
                 else:
-                    prior_s = [1/self.env.n_actions[s] for _ in range(self.env.n_actions[s])]
+                    prior_s = [1 / self.env.n_actions[s] for _ in range(self.env.n_actions[s])]
                 if t == self.env.Tf:  # terminal time step
                     Q_s = np.zeros(self.env.n_actions[s])
                     for a in range(self.env.n_actions[s]):
@@ -57,6 +61,7 @@ class MDP_Solver:
         return self.policy, self.V
 
     def evaluate(self, policy):
+        self.reset_V_storage()
         for t in reversed(range(self.env.Tf + 1)):
             for s in range(self.env.n_states):
                 if t == self.env.Tf:
@@ -66,6 +71,20 @@ class MDP_Solver:
                 else:
                     Q_s = self.compute_Q_s(s, t)
                 self.V_[t][s] = sum(Q_s[a] * policy[t][s][a] for a in range(self.env.n_actions[s]))
+        return self.V_
+
+    def evaluate_entropy(self, policy, prior=None, beta=None):
+        self.reset_V_storage()
+        for t in reversed(range(self.env.Tf + 1)):
+            for s in range(self.env.n_states):
+                if t == self.env.Tf:
+                    Q_s = np.zeros(self.env.n_actions[s])
+                    for a in range(self.env.n_actions[s]):
+                        Q_s[a] = self.env.reward(s=s, a=a, t=t)
+                else:
+                    Q_s = self.compute_Q_s(s, t)
+                self.V_[t][s] = sum(Q_s[a] * policy[t][s][a] for a in range(self.env.n_actions[s])) \
+                                - 1/beta * self._KL_divergence(policy[t][s], prior[t][s])
         return self.V_
 
     def compute_Q_s(self, s, t):
@@ -86,6 +105,12 @@ class MDP_Solver:
             temp += prior_s[a] * exp(beta * Q_s[a])
         V_KL = 1 / beta * log(temp)
         return V_KL
+
+    def _KL_divergence(self, dist1, dist2):
+        KL = 0
+        for a in range(len(dist1)):
+            KL += dist1[a] * np.log(dist1[a] / dist2[a])
+        return KL
 
     def _compute_soft_policy(self, Q_s, prior_s, beta):
         policy_KL = []

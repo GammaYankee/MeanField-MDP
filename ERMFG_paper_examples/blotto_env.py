@@ -12,10 +12,10 @@ connectivity = np.array([[1, 1, 0, 0, 1],
                          [1, 0, 0, 0, 1]])
 # Terminal Time
 Tf = 5
+BETA = 1
 
-prior_1_t = [[0.01, 0.98, 0.01], [0.02, 0.49, 0.49], [0.5, 0.5], [0.5, 0.49, 0.01], [0.99, 0.01]]
-# prior_1_t = [[0.05, 0.9, 0.05], [0.05, 0.47, 0.48], [0.5, 0.5], [0.45, 0.45, 0.1], [0.95, 0.05]]
-prior_1 = [prior_1_t for _ in range(Tf + 1)]
+prior_t = [[0.01, 0.98, 0.01], [0.02, 0.49, 0.49], [0.5, 0.5], [0.5, 0.49, 0.01], [0.99, 0.01]]
+PRIOR = [prior_t for _ in range(Tf + 1)]
 
 
 def generate_actions(connectivity):
@@ -41,15 +41,16 @@ def generate_actions(connectivity):
     return T, n_states, n_actions
 
 
-class BlottoEnv2(MeanFieldEnv):
+class BlottoEnv(MeanFieldEnv):
     def __init__(self, mu_0):
         T, n_states, n_actions = generate_actions(connectivity)
-        super(BlottoEnv2, self).__init__(n_states, n_actions, Tf)
+        super(BlottoEnv, self).__init__(n_states, n_actions, Tf)
         self.set_init_mu(mu_0)
         assert len(self.T) == max(self.n_actions)
         self.entropy_regularized = True
-        self.prior = prior_1
-        self.beta = 2
+        self.prior = PRIOR
+        self.beta = BETA
+        self.terminal_reward_only=True
 
     def set_beta(self, beta):
         self.beta = beta
@@ -85,7 +86,7 @@ class BlottoEnv2(MeanFieldEnv):
             if s == 2:
                 L += 1.5
             elif s == 3:
-                L+= 1
+                L += 1
             if s == s_prime:
                 L -= 1
             return L

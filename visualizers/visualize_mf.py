@@ -9,7 +9,7 @@ def visualize_mf(mu):
     n_states = len(mu[0])
 
     # create figure
-    fig = plt.figure()
+    fig = plt.figure(dpi=120)
     ax = Axes3D(fig)
     column_names = [str(s+1) for s in range(n_states)]  # naming of states
     column_names.insert(0, "")
@@ -26,12 +26,14 @@ def visualize_mf(mu):
     dz = np.array(mu).flatten()
 
     # plot pars
-    ax.bar3d(xpos, ypos, zpos, dx, dy, dz)
+    ax.bar3d(xpos, ypos, zpos, dx, dy, dz, alpha=0.7)
     ax.set_xticks(np.arange(0, n_states+2, 1)-0.5)
+
     ax.xaxis.set_ticklabels(column_names)  # set axis name
-    ax.set_xlabel('State')
-    ax.set_ylabel('Time')
-    ax.set_zlabel('Population')
+    ax.set_xlabel('State', fontsize=15)
+    ax.set_ylabel('Time', fontsize=15, labelpad=10)
+    ax.set_zlabel('Population', fontsize=15)
+    ax.set_zlim3d(bottom=0, top=1.0)
 
     # show plot
     plt.show()

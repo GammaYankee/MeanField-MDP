@@ -5,8 +5,8 @@ from envs.MDP_env import MDPEnv
 import copy
 
 
-class MFSolver:
-    def __init__(self, env: MeanFieldEnv, n_ittr=30, eps=0.0001):
+class MF_Solver:
+    def __init__(self, env: MeanFieldEnv, n_ittr=1000, eps=0.0001):
         self.mean_field_env = env
         self.n_ittr = n_ittr
         self.eps = eps
@@ -43,11 +43,11 @@ class MFSolver:
             diff2 = sum(sum(abs(mu_[t] - mu[t])) for t in range(self.mean_field_env.Tf + 1))
             nu = copy.deepcopy(nu_)
             mu = copy.deepcopy(mu_)
-            print(diff1)
 
-            print("Differene 1 is {}, difference 2 is {}.".format(diff1, diff2))
+            print("Differene in mu is {}".format(diff2))
 
-        self.soln = {"policy": policy, "value": value, "mu": mu, "nu": nu, "MDP_induced": mdp_env}
+        self.soln = {"policy": policy, "value": value, "mu": mu, "nu": nu, "MDP_induced": mdp_env,
+                     "mfg_env": self.mean_field_env}
 
     def propagate_mean_field(self, policy):
         mu = [np.zeros(self.mean_field_env.n_states) for _ in range(self.mean_field_env.Tf + 1)]
