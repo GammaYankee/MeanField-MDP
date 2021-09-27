@@ -4,9 +4,9 @@ import math
 
 
 def plot_log_log_error(N_list, error_list):
-    error_list[0] += 0.005
-    error_list[2] += 0.007
-    error_list[4] -= 0.0005
+    # error_list[0] += 0.005
+    # error_list[2] += 0.007
+    # error_list[4] -= 0.0005
 
     slope = (math.log(error_list[0]) - math.log(error_list[-1])) / (math.log(N_list[0]) - math.log(N_list[-1]))
     # plot
@@ -36,7 +36,7 @@ def plot_log_log_error(N_list, error_list):
 
 
 if __name__ == "__main__":
-    data = pickle.load(open("./ERMFG_paper_examples/data/error_beta_1.pkl", "rb"))
+    data = pickle.load(open("../ERMFG_paper_examples/data/error_beta_1.pkl", "rb"))
 
     N, error = data["N_agent_test_list"], data["error"]
 
