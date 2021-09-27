@@ -8,7 +8,7 @@ import pickle
 # Set up blotto env
 mu0 = np.array([0.3, 0.2, 0.3, 0.1, 0.1])
 mean_field_env = BlottoEnv(mu_0=mu0)
-mean_field_env.set_beta(0.1)
+mean_field_env.set_beta(2)
 
 # Set up MF Solver
 mf_solver = MF_Solver(env=mean_field_env)

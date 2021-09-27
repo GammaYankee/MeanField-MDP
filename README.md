@@ -24,3 +24,6 @@ state MF at t   |`mu_t`             |np array       |Length `N`. `mu[s]` gives t
 state action MF at t|`nu_t`         |np array       |Length `sum(n_actions)`
 state MF flow   |`mu`               |List of np array|Length `Tf+1`. Consists of `mu_t` at each time steps from 0 to `Tf` included.
 sa MF flow      |`nu`               |List of np array|Length `Tf+1`. Consists of `nu_t`.
+
+## Exemplary Outputs
+![Blotto Game Mean Field Flow](/figures/blotto-game-flow.png)
