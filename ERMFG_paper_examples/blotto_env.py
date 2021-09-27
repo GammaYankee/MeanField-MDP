@@ -52,12 +52,6 @@ class BlottoEnv(MeanFieldEnv):
         self.beta = BETA
         self.terminal_reward_only=True
 
-    def set_beta(self, beta):
-        self.beta = beta
-
-    def set_prior(self, prior):
-        self.prior = prior
-
     def _init_transitions(self):
         T, n_states, n_actions = generate_actions(connectivity)
         return T

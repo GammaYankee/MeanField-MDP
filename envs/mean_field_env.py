@@ -15,11 +15,17 @@ class MeanFieldEnv():
         self.Tf = Tf
         self.mu0 = None
         self.gamma = gamma
-        self.dim_nu = sum(self.n_actions)           # dimension of the state-action mean field
+        self.dim_nu = sum(self.n_actions)  # dimension of the state-action mean field
         self.terminal_reward_only = None
 
     def set_init_mu(self, mu0):
         self.mu0 = mu0
+
+    def set_beta(self, beta):
+        self.beta = beta
+
+    def set_prior(self, prior):
+        self.prior = prior
 
     def _init_transitions(self):
         raise NotImplemented

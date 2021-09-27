@@ -1,4 +1,18 @@
 # MeanField-MDP
+This is an implementation of the work **Entropy-Regularized Finite Mean-Field Games** submitted to ACC-22. 
+The code structure is as follows: 
+The resource allocation example is in the ``ERMFG_paper_example`` folder.
+All the environments, including the finite population MDP generation are included in the ``env`` folder. 
+The MDP solvers/evaluators and MFG solvers (with and without entropy-regularization) are all in the ``solvers`` folder.
+
+## Notes on the ``MeanFieldEnv``
+The reference policy and inverse temperature are defined within the MFG environment. 
+To change, play with the parameter sections at the top of the environment code, or use ``set_beta`` and ``set_prior`` functions of the ``MeanFieldEnv``.
+
+If using entropy-regularization, do not forget to set ``MeanFieldEnv.entropy_regularized`` to ``True``.
+
+If using only the terminal rewards, set ``MeanFieldEnv.terminal_reward_only`` to ``True``. This will speed up error verification significantly.
+
 
 ## Data Structure
 Data            |Expression         |Type           |Notes

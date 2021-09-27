@@ -2,7 +2,7 @@ import pickle
 import numpy as np
 from envs.error_test_MDP import FinitePopMDPEnv
 from solvers.MDP_solver import MDP_Solver
-from plot_error import plot_log_log_error
+from visualizers.plot_error import plot_log_log_error
 
 BETA = 1
 
