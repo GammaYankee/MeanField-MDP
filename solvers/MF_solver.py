@@ -6,21 +6,29 @@ import copy
 
 
 class MF_Solver:
-    def __init__(self, env: MeanFieldEnv, n_ittr=1000, eps=0.0001):
+    def __init__(self, env: MeanFieldEnv, n_ittr=50, eps=0.0001):
         self.mean_field_env = env
         self.n_ittr = n_ittr
         self.eps = eps
         self.soln = None
         np.random.seed(0)
 
-    def solve(self, entropy_regularized=False, prior=None, beta=None):
+    def solve(self, time_averaged=False, eta=None, entropy_regularized=False, prior=None, beta=None):
+
+        if entropy_regularized:
+            assert prior is not None and beta is not None
+        if time_averaged:
+            assert eta is not None
+        if time_averaged and entropy_regularized:
+            print("Both time averaged and entropy regularized!")
+
         diff1, diff2 = 1, 1
 
         # randomly initialize policy
         policy = self._init_policy()
         value = None
 
-        # intialize mean field
+        # initialize mean field
         nu = [np.zeros(self.mean_field_env.dim_nu) for _ in range(self.mean_field_env.Tf + 1)]
         mu = [np.zeros(self.mean_field_env.n_states) for _ in range(self.mean_field_env.Tf + 1)]
         mdp_env = None
@@ -35,16 +43,28 @@ class MF_Solver:
             mdp_solver = MDP_Solver(env=mdp_env)
 
             if entropy_regularized:
-                policy, value = mdp_solver.solve_entropy(prior=prior, beta=beta)
+                policy_, value_ = mdp_solver.solve_entropy(prior=prior, beta=beta)
             else:
-                policy, value = mdp_solver.solve()
+                policy_, value_ = mdp_solver.solve()
 
             diff1 = sum(sum(abs(nu_[t] - nu[t])) for t in range(self.mean_field_env.Tf + 1))
             diff2 = sum(sum(abs(mu_[t] - mu[t])) for t in range(self.mean_field_env.Tf + 1))
-            nu = copy.deepcopy(nu_)
-            mu = copy.deepcopy(mu_)
 
-            print("Differene in mu is {}".format(diff2))
+            if not time_averaged:
+                nu = copy.deepcopy(nu_)
+                mu = copy.deepcopy(mu_)
+                policy = copy.deepcopy(policy_)
+                value = copy.deepcopy(value_)
+            else:
+                # perform a soft update
+                nu = self._soft_update(x_old=nu, x_new=nu_, eta=eta)
+                mu = self._soft_update(x_old=mu, x_new=mu_, eta=eta)
+                # nu = copy.deepcopy(nu_)
+                # mu = copy.deepcopy(mu_)
+                policy = self._soft_update_policy(policy_old=policy, policy_new=policy_, eta=eta)
+                value = self._soft_update(x_old=value, x_new=value_, eta=eta)
+
+            print("Difference in mu is {}".format(diff2))
 
         self.soln = {"policy": policy, "value": value, "mu": mu, "nu": nu, "MDP_induced": mdp_env,
                      "mfg_env": self.mean_field_env}
@@ -101,7 +121,7 @@ class MF_Solver:
             for s in range(self.mean_field_env.n_states):
                 tmp = np.random.random(self.mean_field_env.n_actions[s])
                 tmp = tmp / sum(tmp)
-                policy_t.append(tmp)
+                policy_t.append(list(tmp))
             policy.append(policy_t)
         return policy
 
@@ -124,3 +144,19 @@ class MF_Solver:
         mdp_env.set_transitions(self.mean_field_env.T)
 
         return mdp_env
+
+    @staticmethod
+    def _soft_update(x_old, x_new, eta):
+        if x_old is None:
+            return x_new
+        x_ = (1 - eta) * np.array(x_old) + eta * np.array(x_new)
+        return x_
+
+    @staticmethod
+    def _soft_update_policy(policy_old, policy_new, eta):
+        if policy_old is None:
+            return policy_new
+        T, N = len(policy_old), len(policy_old[0])
+        policy_ = [[list((1 - eta) * np.array(policy_old[t][s]) + eta * np.array(policy_new[t][s])) for s in range(N)]
+                   for t in range(T)]
+        return policy_

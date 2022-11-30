@@ -24,8 +24,6 @@ mean_field_env = BlottoEnv2(mu_0=mu0)
 
 # MF Solver test
 mf_solver = MF_Solver(env=mean_field_env)
-mf_solver.solve()
-mf_solver = MF_Solver(env=mean_field_env)
 mf_solver.solve(entropy_regularized=True, beta=mean_field_env.beta, prior=mean_field_env.prior)
 print(mf_solver.soln["mu"][-1])
 

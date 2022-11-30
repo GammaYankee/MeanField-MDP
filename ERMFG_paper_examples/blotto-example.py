@@ -3,6 +3,7 @@ from ERMFG_paper_examples.blotto_env import BlottoEnv
 from solvers.MF_solver import MF_Solver
 from solvers.MDP_solver import MDP_Solver
 from visualizers.visualize_mf import visualize_mf
+from utils import ROOT_PATH
 import pickle
 
 # Set up blotto env
@@ -19,4 +20,4 @@ visualize_mf(mf_solver.soln["mu"])
 
 # save results
 data = mf_solver.soln
-pickle.dump(data, open("./data/mf_soln_beta_{}.pkl".format(mean_field_env.beta), "wb"))
+pickle.dump(data, open(ROOT_PATH/"test_data/mf_soln_beta_{}.pkl".format(mean_field_env.beta), "wb"))

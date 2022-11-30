@@ -3,11 +3,12 @@ import numpy as np
 from envs.error_test_MDP import FinitePopMDPEnv
 from solvers.MDP_solver import MDP_Solver
 from visualizers.plot_error import plot_log_log_error
+from utils import ROOT_PATH
 
-BETA = 1
+BETA = 2
 
 # load solution results
-mf_soln = pickle.load(open("./data/mf_soln_beta_{}.pkl".format(BETA), "rb"))
+mf_soln = pickle.load(open(ROOT_PATH/"test_data/mf_soln_beta_{}.pkl".format(BETA), "rb"))
 
 # compute original value
 mean_field_env = mf_soln["mfg_env"]
