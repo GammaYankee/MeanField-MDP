@@ -3,6 +3,7 @@ import numpy as np
 from mf_mdp.solvers.MF_solver import MF_Solver
 from mf_mdp.envs.traffic import TrafficEnv
 from mf_mdp.visualizers.renderers import TrafficRenderer
+from mf_mdp.visualizers.simulator import BaseAgent, MFSimulator
 
 if __name__ == "__main__":
     from utils import ROOT_PATH
@@ -17,7 +18,7 @@ if __name__ == "__main__":
     mu0 = np.zeros(mf_env.n_states)
     n = 0
     for l in range(2):
-        for b in range(3):
+        for b in range(2):
             s = mf_env.status2state(lane=l, block=b)
             mu0[s] = 1
             n += 1
@@ -27,18 +28,23 @@ if __name__ == "__main__":
     mf_env.set_beta(1)
 
     mf_solver = MF_Solver(env=mf_env)
-    mf_solver.solve(entropy_regularized=True, beta=mf_env.beta, prior=None)
-    mf_solver.save(file_path)
+    # mf_solver.solve(entropy_regularized=True, beta=mf_env.beta, prior=None)
+    # mf_solver.save(file_path)
 
     mf_solver.load(file_path)
 
-    renderer = TrafficRenderer(env=mf_env, cmap_type="jet", save_dir=ROOT_PATH / "data/gif", save_gif=True)
+    agent_list = [
+        BaseAgent(index=0, policy=mf_solver.soln["policy"], s0=mf_env.status2state(lane=0, block=0), color='b'),
+        BaseAgent(index=1, policy=mf_solver.soln["policy"], s0=mf_env.status2state(lane=0, block=1), color='r'),
+        BaseAgent(index=2, policy=mf_solver.soln["policy"], s0=mf_env.status2state(lane=1, block=0), color='y'),
+        BaseAgent(index=3, policy=mf_solver.soln["policy"], s0=mf_env.status2state(lane=1, block=1), color='g')
+    ]
 
-    renderer.create_figure()
-    for t in range(40):
-        renderer.render_lanes()
-        renderer.render_mf(mf=mf_solver.soln["mu"][t])
-        renderer.render_obstacles()
-        renderer.show()
-        renderer.hold(t=0.2)
-        renderer.clear()
+    renderer = TrafficRenderer(env=mf_env, save_gif=True, save_dir=ROOT_PATH/"figures/gif")
+
+    simulator = MFSimulator(env=mf_env, agent_list=agent_list, renderer=renderer)
+
+    for t in range(30):
+        simulator.step()
+
+    simulator.renderer.render_gif()
