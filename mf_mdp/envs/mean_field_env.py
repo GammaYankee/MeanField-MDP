@@ -30,6 +30,9 @@ class MeanFieldEnv():
     def _init_transitions(self):
         raise NotImplemented
 
+    def get_transition(self, s, a, mu=None):
+        return self.T[a][s]
+
     def individual_reward(self, s_t, a_t, nu_t, t):
         l = 0
         mu_t = self.nu2mu(nu_t)
@@ -55,7 +58,7 @@ class MeanFieldEnv():
         return s, a
 
     def nu_vec2nu_matrix(self, nu_vec: np.ndarray):
-        nu = nu_vec.reshape((self.n_states, self.n_actions))
+        nu = nu_vec.reshape((self.n_states, self.n_actions[0]))
         return nu
 
     def nu2mu(self, nu_vec):

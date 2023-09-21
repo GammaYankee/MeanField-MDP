@@ -1,5 +1,5 @@
 import numpy as np
-from envs.MDP_env import MDPEnv
+from mf_mdp.envs.MDP_env import MDPEnv
 from copy import deepcopy
 from math import exp, log
 
@@ -93,7 +93,7 @@ class MDP_Solver:
         V_next = self.V_[t + 1]
         for a in range(n_actions):
             Q_s[a] += self.env.reward(s=s, a=a, t=t)
-            T_sa = self.env.T[a][s]
+            T_sa = self.env.get_transition_sa(s, a, t)
             assert len(T_sa) > 0
             for s_prime in range(self.env.n_states):
                 Q_s[a] += self.env.gamma * T_sa[s_prime] * V_next[s_prime]

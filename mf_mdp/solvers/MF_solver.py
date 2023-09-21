@@ -1,12 +1,12 @@
 import numpy as np
-from solvers.MDP_solver import MDP_Solver
-from envs.mean_field_env import MeanFieldEnv
-from envs.MDP_env import MDPEnv
+from mf_mdp.solvers.MDP_solver import MDP_Solver
+from mf_mdp.envs.mean_field_env import MeanFieldEnv
+from mf_mdp.envs.MDP_env import MDPEnv
 import copy
 
 
 class MF_Solver:
-    def __init__(self, env: MeanFieldEnv, n_ittr=50, eps=0.0001):
+    def __init__(self, env: MeanFieldEnv, n_ittr=50, eps=0.01):
         self.mean_field_env = env
         self.n_ittr = n_ittr
         self.eps = eps
@@ -16,7 +16,7 @@ class MF_Solver:
     def solve(self, time_averaged=False, eta=None, entropy_regularized=False, prior=None, beta=None):
 
         if entropy_regularized:
-            assert prior is not None and beta is not None
+            assert beta is not None
         if time_averaged:
             assert eta is not None
         if time_averaged and entropy_regularized:
@@ -78,7 +78,7 @@ class MF_Solver:
 
         for t in range(0, self.mean_field_env.Tf):
             mu_t = mu[t]
-            T_c = self.controlled_trans(pi_t=policy[t])
+            T_c = self.controlled_trans(pi_t=policy[t], mu_t=mu_t)
             mu_next = np.matmul(mu_t, T_c)
             mu[t + 1] = mu_next
 
@@ -104,11 +104,11 @@ class MF_Solver:
         assert pointer == self.mean_field_env.dim_nu
         return nu_t
 
-    def controlled_trans(self, pi_t):
+    def controlled_trans(self, pi_t, mu_t=None):
         T_c = np.zeros((self.mean_field_env.n_states, self.mean_field_env.n_states))
         for s in range(self.mean_field_env.n_states):
             for a in range(self.mean_field_env.n_actions[s]):
-                T_c[s, :] += self.mean_field_env.T[a][s] * pi_t[s][a]
+                T_c[s, :] += self.mean_field_env.get_transition(s, a, mu_t) * pi_t[s][a]
 
         assert all(abs(np.sum(T_c, axis=1) - 1) < 1e-5)
 
@@ -129,19 +129,25 @@ class MF_Solver:
         n_actions = max(self.mean_field_env.n_actions)
 
         reward_vec = [[] for t in range(self.mean_field_env.Tf + 1)]
+        transitions = [[np.zeros((self.mean_field_env.n_states, self.mean_field_env.n_states))
+                        for a in range(max(self.mean_field_env.n_actions))]
+                       for t in range(self.mean_field_env.Tf + 1)]
 
         for t in range(self.mean_field_env.Tf + 1):
+            mu_t = self.mean_field_env.nu2mu(nu_vec=nu[t])
             for s in range(self.mean_field_env.n_states):
                 reward_s = []
                 for a in range(self.mean_field_env.n_actions[s]):
                     reward_s.append(self.mean_field_env.individual_reward(s_t=s, a_t=a, nu_t=nu[t], t=t))
+                    transitions[t][a][s, :] = self.mean_field_env.get_transition(s, a, mu=mu_t)
+
                 reward_vec[t].append(reward_s)
 
         mdp_env = MDPEnv(n_states=self.mean_field_env.n_states, n_actions=self.mean_field_env.n_actions,
                          Tf=self.mean_field_env.Tf, gamma=self.mean_field_env.gamma)
 
         mdp_env.set_reward_vec(reward_vec)
-        mdp_env.set_transitions(self.mean_field_env.T)
+        mdp_env.set_transitions(transitions)
 
         return mdp_env
 

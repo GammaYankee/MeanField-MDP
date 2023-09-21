@@ -1,7 +1,8 @@
 import numpy as np
 
+
 class MDPEnv:
-    def __init__(self,n_states, n_actions, Tf, gamma=0.9):
+    def __init__(self, n_states, n_actions, Tf, gamma=0.9):
         self.n_states = n_states
         self.n_actions = n_actions
         self.T = None
@@ -11,6 +12,9 @@ class MDPEnv:
 
     def set_transitions(self, transitions):
         self.T = transitions
+
+    def get_transition_sa(self, s, a, t=None):
+        return self.T[t][a][s, :]
 
     def reward(self, s, a, t):
         return self.reward_vec[t][s][a]

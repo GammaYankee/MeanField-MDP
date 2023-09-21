@@ -1,7 +1,7 @@
 import numpy as np
-from envs.MDP_env import MDPEnv
-from envs.mean_field_env import MeanFieldEnv
-from utils import empirical_dist, test_emp_dist
+from mf_mdp.envs.MDP_env import MDPEnv
+from mf_mdp.envs.mean_field_env import MeanFieldEnv
+from utils import empirical_dist
 
 
 class FinitePopMDPEnv(MDPEnv):

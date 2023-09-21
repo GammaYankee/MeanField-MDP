@@ -1,8 +1,6 @@
 import math
 from copy import deepcopy
 import numpy as np
-import matplotlib.pyplot as plt
-from envs.mean_field_env import MeanFieldEnv
 from math import factorial
 import pathlib
 

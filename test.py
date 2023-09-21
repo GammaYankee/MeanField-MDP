@@ -1,9 +1,9 @@
 import numpy as np
-from envs.blotto_env_v2 import BlottoEnv2
-from solvers.MF_solver import MF_Solver
-from solvers.MDP_solver import MDP_Solver
-from visualizers.visualize_mf import visualize_mf
-from envs.error_test_MDP import FinitePopMDPEnv
+from mf_mdp.envs.blotto_env_v2 import BlottoEnv2
+from mf_mdp.solvers.MF_solver import MF_Solver
+from mf_mdp.solvers.MDP_solver import MDP_Solver
+from mf_mdp.visualizers.visualize_mf import visualize_mf
+from mf_mdp.envs.error_test_MDP import FinitePopMDPEnv
 import pickle
 
 # mu0 = np.array([0.3, 0.4, 0.2, 0.1])
