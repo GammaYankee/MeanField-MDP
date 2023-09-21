@@ -3,6 +3,7 @@ from mf_mdp.solvers.MDP_solver import MDP_Solver
 from mf_mdp.envs.mean_field_env import MeanFieldEnv
 from mf_mdp.envs.MDP_env import MDPEnv
 import copy
+import pickle as pkl
 
 
 class MF_Solver:
@@ -166,3 +167,13 @@ class MF_Solver:
         policy_ = [[list((1 - eta) * np.array(policy_old[t][s]) + eta * np.array(policy_new[t][s])) for s in range(N)]
                    for t in range(T)]
         return policy_
+
+    def save(self, save_file_dir):
+        with open(save_file_dir, "wb") as f:
+            pkl.dump(self.soln, f)
+
+    def load(self, save_file_dir):
+        with open(save_file_dir, "rb") as f:
+            self.soln = pkl.load(f)
+
+        return self.soln

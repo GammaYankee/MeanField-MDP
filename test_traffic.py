@@ -5,8 +5,12 @@ from mf_mdp.envs.traffic import TrafficEnv
 from mf_mdp.visualizers.renderers import TrafficRenderer
 
 if __name__ == "__main__":
+    from utils import ROOT_PATH
+
+    file_path = ROOT_PATH / "data/mf_soln/traffic_soln.pkl"
+
     action_vector_list = [np.array([-1, 0]), np.array([-1, 1]), np.array([0, 1]), np.array([1, 1]), np.array([1, 0])]
-    obstacle_list = [[0,5], [2, 10], [1, 15]]
+    obstacle_list = [[0, 5], [2, 10]]
 
     mf_env = TrafficEnv(n_lanes=3, n_blocks=20, cells_per_block=1, n_actions=5, action_vec_list=action_vector_list,
                         obstacle_list=obstacle_list, Tf=40)
@@ -24,8 +28,11 @@ if __name__ == "__main__":
 
     mf_solver = MF_Solver(env=mf_env)
     mf_solver.solve(entropy_regularized=True, beta=mf_env.beta, prior=None)
+    mf_solver.save(file_path)
 
-    renderer = TrafficRenderer(env=mf_env)
+    mf_solver.load(file_path)
+
+    renderer = TrafficRenderer(env=mf_env, cmap_type="jet", save_dir=ROOT_PATH / "data/gif", save_gif=True)
 
     renderer.create_figure()
     for t in range(40):

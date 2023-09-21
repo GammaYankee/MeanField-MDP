@@ -1,8 +1,8 @@
 import pickle
 import numpy as np
-from envs.error_test_MDP import FinitePopMDPEnv
-from solvers.MDP_solver import MDP_Solver
-from visualizers.plot_error import plot_log_log_error
+from mf_mdp.envs.error_test_MDP import FinitePopMDPEnv
+from mf_mdp.solvers.MDP_solver import MDP_Solver
+from mf_mdp.visualizers.plot_error import plot_log_log_error
 from utils import ROOT_PATH
 
 BETA = 2

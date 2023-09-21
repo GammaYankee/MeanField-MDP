@@ -35,7 +35,8 @@ class Renderer():
 
 class MatplotlibRenderer(Renderer):
     def __init__(self, xaxis_range=None, yaxis_range=None, auto_range=None, figure_size=None, figure_dpi=None,
-                 axis_equal=True, show_axis=True, save_gif=False, save_dir=None, hold_time=0.3):
+                 axis_equal=True, show_axis=True,
+                 save_gif=False, save_dir=None, hold_time=0.3):
         Renderer.__init__(self)
         self.xaxis_range = xaxis_range
         self.yaxis_range = yaxis_range
@@ -54,6 +55,10 @@ class MatplotlibRenderer(Renderer):
         self.frame = int(0)
         self.episode = int(0)
 
+        self.show_cbar = False
+        self.cmap = None
+        self.norm=None
+
     def create_figure(self):
         self._figure = plt.figure(figsize=(self.figure_size[0], self.figure_size[1]), dpi=self.figure_dpi)
         self._axis = self._figure.add_subplot(1, 1, 1)
@@ -63,6 +68,12 @@ class MatplotlibRenderer(Renderer):
         if not self.show_axis:
             self._axis.axis('off')
         plt.figure(self._figure.number)
+
+        if self.show_cbar:
+            sm = plt.cm.ScalarMappable(cmap=self.cmap)
+            sm.set_array([])
+            self._figure.colorbar(sm, ticks=np.linspace(0, 1, 6), norm=self.norm,
+                                  pad=0.2, shrink=0.5)
 
     def set_range(self):
         if not self.auto_range:
@@ -153,7 +164,9 @@ class MatplotlibRenderer(Renderer):
 
 
 class TrafficRenderer(MatplotlibRenderer):
-    def __init__(self, env: TrafficEnv, lane_width=0.5, save_gif=False, save_dir=None, show_axis=False):
+    def __init__(self, env: TrafficEnv, lane_width=0.5,
+                 show_cbar=True, cmap_type="jet",
+                 save_gif=False, save_dir=None, show_axis=False):
         self.env = env
         self.n_lanes, self.n_blocks = env.n_lanes, env.n_blocks
         self.lane_width = lane_width
@@ -161,6 +174,11 @@ class TrafficRenderer(MatplotlibRenderer):
         super().__init__(xaxis_range=[0, lane_width * self.n_lanes], yaxis_range=[0, self.n_blocks], auto_range=False,
                          figure_size=[4, 4], figure_dpi=240, show_axis=show_axis,
                          save_gif=save_gif, save_dir=save_dir)
+
+        # for color bar
+        self.show_cbar = show_cbar
+        self.norm = matplotlib.colors.Normalize(vmin=0, vmax=1/self.env.n_lanes)
+        self.cmap = matplotlib.cm.get_cmap(cmap_type)
 
     def render_lanes(self):
         # add boundary
@@ -188,18 +206,14 @@ class TrafficRenderer(MatplotlibRenderer):
             self._axis.add_patch(patches.Rectangle((lane * self.lane_width, block), self.lane_width, 1.0,
                                                    facecolor='k'))
 
-
     def render_mf(self, mf):
-        cmap = matplotlib.cm.get_cmap('rainbow')
 
         for s in range(self.env.n_states):
-            p = mf[s]
+            p = mf[s] * self.env.n_lanes
             lane, block = self.env.state2status(s)
-            rgba = cmap(p)
-            self._axis.add_patch(patches.Rectangle((lane*self.lane_width, block), self.lane_width, 1.0, facecolor=rgba))
-
-
-
+            rgba = self.cmap(p)
+            self._axis.add_patch(
+                patches.Rectangle((lane * self.lane_width, block), self.lane_width, 1.0, facecolor=rgba))
 
 
 if __name__ == "__main__":

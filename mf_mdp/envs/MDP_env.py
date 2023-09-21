@@ -14,7 +14,7 @@ class MDPEnv:
         self.T = transitions
 
     def get_transition_sa(self, s, a, t=None):
-        return self.T[t][a][s, :]
+        return self.T[t][a][s]
 
     def reward(self, s, a, t):
         return self.reward_vec[t][s][a]

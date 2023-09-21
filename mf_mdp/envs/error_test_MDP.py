@@ -18,7 +18,7 @@ class FinitePopMDPEnv(MDPEnv):
         self._init_reward_vec()
 
     def _init_transitions(self):
-        self.T = self.mean_field_env.T
+        self.T = [self.mean_field_env.T for _ in range(self.Tf)]
 
     def _init_reward_vec(self):
         reward_vec = [[] for _ in range(self.Tf + 1)]
@@ -73,16 +73,16 @@ class FinitePopMDPEnv(MDPEnv):
         mu = [self.mu_0]
         for t in range(self.Tf):
             pi_t = self.mean_field_policy[t]
-            controlled_trans = self.mean_field_controlled_trans(pi_t)
+            controlled_trans = self.mean_field_controlled_trans(pi_t, t)
             mu.append(np.matmul(mu[t], controlled_trans))
         self.mu = mu
         return mu
 
-    def mean_field_controlled_trans(self, pi_t):
+    def mean_field_controlled_trans(self, pi_t, t):
         T_c = np.zeros((self.n_states, self.n_states))
         for s in range(self.n_states):
             for a in range(self.n_actions[s]):
-                T_c[s, :] += self.T[a][s] * pi_t[s][a]
+                T_c[s, :] += self.T[t][a][s] * pi_t[s][a]
 
         assert all(abs(np.sum(T_c, axis=1) - 1) < 1e-5)
 

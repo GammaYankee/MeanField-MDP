@@ -3,9 +3,9 @@ import sys, os
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from solvers.MF_solver import MF_Solver
-from visualizers.visualize_mf import visualize_mf
-from ERMFG_paper_examples.blotto_env import BlottoEnv
+from mf_mdp.solvers.MF_solver import MF_Solver
+from mf_mdp.visualizers.visualize_mf import visualize_mf
+from mf_mdp.ERMFG_paper_examples.blotto_env import BlottoEnv
 from utils import ROOT_PATH
 import pickle
 
