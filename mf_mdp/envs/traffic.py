@@ -52,6 +52,9 @@ class TrafficEnv(MeanFieldEnv):
         if new_state == s or new_state in self.obstacle_state_list:
             s_list = [s]
             p_list = [1]
+        elif self.isTerminal(new_state):
+            s_list = [new_state]
+            p_list = [1]
         else:
             s_list = [s, new_state]
             p_list = [mu[new_state], 1 - mu[new_state]]
