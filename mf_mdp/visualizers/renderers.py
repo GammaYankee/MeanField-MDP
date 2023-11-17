@@ -57,7 +57,7 @@ class MatplotlibRenderer(Renderer):
 
         self.show_cbar = False
         self.cmap = None
-        self.norm=None
+        self.norm = None
 
     def create_figure(self):
         self._figure = plt.figure(figsize=(self.figure_size[0], self.figure_size[1]), dpi=self.figure_dpi)
@@ -177,7 +177,7 @@ class TrafficRenderer(MatplotlibRenderer):
 
         # for color bar
         self.show_cbar = show_cbar
-        self.norm = matplotlib.colors.Normalize(vmin=0, vmax=1/self.env.n_lanes)
+        self.norm = matplotlib.colors.Normalize(vmin=0, vmax=1 / self.env.n_lanes)
         self.cmap = matplotlib.cm.get_cmap(cmap_type)
 
     def render_lanes(self):
@@ -205,6 +205,16 @@ class TrafficRenderer(MatplotlibRenderer):
             lane, block = self.env.state2status(s)
             self._axis.add_patch(patches.Rectangle((lane * self.lane_width, block), self.lane_width, 1.0,
                                                    facecolor='k'))
+
+    def render_car(self, s, color):
+        lane, block = self.env.state2status(s)
+        self._axis.add_patch(patches.Rectangle(((lane + 0.2) * self.lane_width, block + 0.2), self.lane_width / 3, 0.3,
+                                               facecolor=color))
+
+    def render_agents(self, agent_list):
+        self.render_lanes()
+        for agent in agent_list:
+            self.render_car(s=agent.state, color=agent.color)
 
     def render_mf(self, mf):
 
